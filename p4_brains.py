@@ -53,9 +53,15 @@ class SlugBrain:
     # TODO: IMPLEMENT THIS METHOD
     #  (Use helper methods and classes to keep your code organized where
     #  approprioate.)
-    if message == 'order':
+    if isinstance(details, tuple):
+        print("it's a tuple!")
         self.body.go_to(details)
-
+    if isinstance(details, str):
+        print("it's a string!")
+        if details == 'i':
+            self.body.stop()
+            print("stopped!")
+        
 
 world_specification = {
   'worldgen_seed': 13, # comment-out to randomize

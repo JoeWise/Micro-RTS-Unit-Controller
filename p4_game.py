@@ -300,7 +300,7 @@ class World:
 
     for obj in self.selection:
       if obj.brain:
-        obj.brain.handle_event('order',order)
+        obj.brain.handle_event('order', order)
 
   def make_selection(self):
     """build selection from the set of units contained in the sel_a-to-sel_b
