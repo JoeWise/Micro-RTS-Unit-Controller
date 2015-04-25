@@ -53,7 +53,9 @@ class SlugBrain:
     # TODO: IMPLEMENT THIS METHOD
     #  (Use helper methods and classes to keep your code organized where
     #  approprioate.)
-    pass    
+    if message == 'order':
+        self.body.go_to(details)
+
 
 world_specification = {
   'worldgen_seed': 13, # comment-out to randomize
