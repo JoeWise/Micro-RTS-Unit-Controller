@@ -390,7 +390,6 @@ class GameObject(object):
           outline='black',
           fill='')
 
-
   def update(self, dt):
     """handle simulation-rate updates by delegating to controller"""
     if self.timer_deadline is not None:

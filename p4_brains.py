@@ -45,23 +45,41 @@ class MantisBrain:
     
 class SlugBrain:
 
-  def __init__(self, body):
-    self.body = body
+    def __init__(self, body):
+        self.body = body
+        self.state = 'idle'
+
+    def follow_nearest_mantis(self):
+        self.body.follow(self.body.find_nearest('Mantis'))
 
 
-  def handle_event(self, message, details):
-    # TODO: IMPLEMENT THIS METHOD
-    #  (Use helper methods and classes to keep your code organized where
-    #  approprioate.)
-    if isinstance(details, tuple):
-        print("it's a tuple!")
-        self.body.go_to(details)
-    if isinstance(details, str):
-        print("it's a string!")
-        if details == 'i':
-            self.body.stop()
-            print("stopped!")
-        
+    def handle_event(self, message, details):
+        if message == 'order':
+            if isinstance(details, tuple):
+                print("go over there!")
+                self.state = 'move'
+                self.body.go_to(details)
+            elif isinstance(details, str):
+                if details == 'i':
+                    self.state = 'idle'
+                    self.body.stop()
+                    print("stopped!")
+                if details == 'a':
+                    print("attack!")
+                    self.state = 'attack'
+                    self.follow_nearest_mantis()
+                    self.body.set_alarm(2)
+        elif message == 'collide':
+            print("collision!")
+            if self.state == 'attack':
+                if details['what'] == 'Mantis':
+                    details['who'].amount -= 0.05
+        elif message == 'timer':
+            print("alarm going off!")
+            if self.state == 'attack':
+                self.follow_nearest_mantis()
+                self.body.set_alarm(2)
+
 
 world_specification = {
   'worldgen_seed': 13, # comment-out to randomize
