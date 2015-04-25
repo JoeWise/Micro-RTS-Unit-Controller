@@ -52,33 +52,64 @@ class SlugBrain:
     def follow_nearest_mantis(self):
         self.body.follow(self.body.find_nearest('Mantis'))
 
+    def go_to_nearest_nest(self):
+        self.body.go_to(self.body.find_nearest('Nest'))
+
+    def move(self, coordinates):
+        print("go over there!")
+        self.state = 'move'
+        self.body.go_to(coordinates)
+
+    def idle(self):
+        self.state = 'idle'
+        self.body.stop()
+        print("stopped!")
+
+    def attack(self):
+        self.state = 'attack'
+        self.follow_nearest_mantis()
+        self.body.set_alarm(2)
+
+    def build(self):
+        self.state = 'build'
+        self.go_to_nearest_nest()
+        self.body.set_alarm(2)
+
 
     def handle_event(self, message, details):
         if message == 'order':
+            # if the message is order and details is a tuple, then it's a move order
             if isinstance(details, tuple):
-                print("go over there!")
-                self.state = 'move'
-                self.body.go_to(details)
+                self.move(details)
+            # if the message is order and details is a string, then it's a key order
             elif isinstance(details, str):
                 if details == 'i':
-                    self.state = 'idle'
-                    self.body.stop()
-                    print("stopped!")
-                if details == 'a':
+                    self.idle()
+                elif details == 'a':
                     print("attack!")
-                    self.state = 'attack'
-                    self.follow_nearest_mantis()
-                    self.body.set_alarm(2)
+                    self.attack()
+                elif details == 'b':
+                    self.build()
+
         elif message == 'collide':
-            print("collision!")
+            # if we're attacking and colliding with a mantis, do damage to the mantis
             if self.state == 'attack':
                 if details['what'] == 'Mantis':
                     details['who'].amount -= 0.05
+            elif self.state == 'build':
+                if details['what'] == 'Nest':
+                    if details['who'].amount < 1:
+                        details['who'].amount += 0.01
+                    else:
+                        self.idle()
+
         elif message == 'timer':
             print("alarm going off!")
+            # if an alarm goes off and we're attacking, it's to update which mantis we're following
             if self.state == 'attack':
-                self.follow_nearest_mantis()
-                self.body.set_alarm(2)
+                self.attack()
+            elif self.state == 'build':
+                self.build()
 
 
 world_specification = {
