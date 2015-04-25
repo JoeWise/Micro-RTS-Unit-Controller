@@ -98,10 +98,7 @@ class SlugBrain:
                     details['who'].amount -= 0.05
             elif self.state == 'build':
                 if details['what'] == 'Nest':
-                    if details['who'].amount < 1:
-                        details['who'].amount += 0.01
-                    else:
-                        self.idle()
+                    details['who'].amount += 0.01
 
         elif message == 'timer':
             print("alarm going off!")
