@@ -48,22 +48,36 @@ class SlugBrain:
     def __init__(self, body):
         self.body = body
         self.state = 'idle'
+        self.have_resource = False
 
     def follow_nearest_mantis(self):
-        self.body.follow(self.body.find_nearest('Mantis'))
+        try:
+            self.body.follow(self.body.find_nearest('Mantis'))
+        except:
+            print('no more Mantises')
+            self.idle()
 
     def go_to_nearest_nest(self):
-        self.body.go_to(self.body.find_nearest('Nest'))
+        try:
+            self.body.go_to(self.body.find_nearest('Nest'))
+        except:
+            print('no more Nests')
+            self.idle()
+
+    def go_to_nearest_resource(self):
+        try:
+            self.body.go_to(self.body.find_nearest('Resource'))
+        except:
+            print('no more Resources')
+            self.idle()
 
     def move(self, coordinates):
-        print("go over there!")
         self.state = 'move'
         self.body.go_to(coordinates)
 
     def idle(self):
         self.state = 'idle'
         self.body.stop()
-        print("stopped!")
 
     def attack(self):
         self.state = 'attack'
@@ -75,6 +89,18 @@ class SlugBrain:
         self.go_to_nearest_nest()
         self.body.set_alarm(2)
 
+    def harvest(self):
+        self.state = 'harvest'
+        if self.have_resource:
+            self.go_to_nearest_nest()
+        else:
+            self.go_to_nearest_resource()
+        self.body.set_alarm(2)
+
+    def flee(self):
+        self.state = 'flee'
+        self.go_to_nearest_nest()
+        self.body.set_alarm(2)
 
     def handle_event(self, message, details):
         if message == 'order':
@@ -90,6 +116,8 @@ class SlugBrain:
                     self.attack()
                 elif details == 'b':
                     self.build()
+                elif details == 'h':
+                    self.harvest()
 
         elif message == 'collide':
             # if we're attacking and colliding with a mantis, do damage to the mantis
@@ -99,14 +127,29 @@ class SlugBrain:
             elif self.state == 'build':
                 if details['what'] == 'Nest':
                     details['who'].amount += 0.01
+            elif self.state == 'harvest':
+                if details['what'] == 'Resource':
+                    details['who'].amount -= 0.25
+                    self.have_resource = True
+                elif details['what'] == 'Nest':
+                    self.have_resource = False
+            elif self.state == 'harvest':
+                self.body.amount = 1
 
         elif message == 'timer':
-            print("alarm going off!")
             # if an alarm goes off and we're attacking, it's to update which mantis we're following
             if self.state == 'attack':
                 self.attack()
             elif self.state == 'build':
                 self.build()
+            elif self.state == 'harvest':
+                self.harvest()
+
+            if self.body.amount < 0.5:
+                print('flee!')
+                self.flee()
+
+            self.body.set_alarm(2)
 
 
 world_specification = {
