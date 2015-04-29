@@ -128,13 +128,15 @@ class SlugBrain:
                 if details['what'] == 'Nest':
                     details['who'].amount += 0.01
             elif self.state == 'harvest':
-                if details['what'] == 'Resource':
+                if details['what'] == 'Resource' and not self.have_resource:
                     details['who'].amount -= 0.25
                     self.have_resource = True
                 elif details['what'] == 'Nest':
                     self.have_resource = False
-            elif self.state == 'harvest':
-                self.body.amount = 1
+            elif self.state == 'flee':
+                if details['what'] == 'Nest':
+                    self.body.amount = 1
+
 
         elif message == 'timer':
             # if an alarm goes off and we're attacking, it's to update which mantis we're following
